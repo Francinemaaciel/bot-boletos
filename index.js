@@ -1,12 +1,11 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
-
-const token = process.env.TELEGRAM_TOKEN;
-
 const fs = require('fs');
 
+const token = process.env.TELEGRAM_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
+// Função para ler os boletos do arquivo
 function lerBoletos() {
   const data = fs.readFileSync('boletos.json');
   return JSON.parse(data);
@@ -17,10 +16,8 @@ function salvarBoletos(boletos) {
   fs.writeFileSync('boletos.json', JSON.stringify(boletos, null, 2));
 }
 
-
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id, `Olá, ${msg.from.first_name}! Eu sou seu bot de boletos! Use /boletos para ver os pendentes.`);
-
 });
 
 // Comando /boletos
@@ -39,28 +36,28 @@ bot.onText(/\/boletos/, (msg) => {
   }
 });
 
-// Comando para atualizar o valor, vencimento e código de barras de um boleto
-bot.onText(/\/atualizar_boleto (.+) (\d+(\.\d{1,2})?) (\d{2}\/\d{2}\/\d{2}) (\d{44})/, (msg, match) => {
-  const nomeBoleto = match[1].trim().toLowerCase(); // Nome do boleto
-  const novoValor = parseFloat(match[2]); // Novo valor
-  const novoVencimento = match[4]; // Novo vencimento (dd/mm/aa)
-  const novoCodigoDeBarras = match[5]; // Novo código de barras (44 caracteres)
+// Comando para adicionar um novo boleto
+bot.onText(/\/adicionar_boleto (.+) (\d+(\.\d{1,2})?) (\d{2}\/\d{2}\/\d{2}) (\d{44})/, (msg, match) => {
+  const nomeBoleto = match[1].trim(); // Nome do boleto
+  const valor = parseFloat(match[2]); // Valor do boleto
+  const vencimento = match[4]; // Vencimento (dd/mm/aa)
+  const codigoDeBarras = match[5]; // Código de barras (44 caracteres)
 
   const boletos = lerBoletos(); // Lê os boletos do arquivo
-  const boleto = boletos.find(b => b.nome.toLowerCase() === nomeBoleto);
+  const novoBoleto = {
+    nome: nomeBoleto,
+    valor: valor,
+    vencimento: vencimento,
+    codigoDeBarras: codigoDeBarras,
+    pago: false
+  };
 
-  if (boleto) {
-    // Atualiza o valor, vencimento e código de barras do boleto
-    boleto.valor = novoValor;
-    boleto.vencimento = novoVencimento;
-    boleto.codigoDeBarras = novoCodigoDeBarras;
+  // Adiciona o novo boleto
+  boletos.push(novoBoleto);
 
-    // Salva os boletos atualizados
-    salvarBoletos(boletos);
-    bot.sendMessage(msg.chat.id, `O boleto de ${boleto.nome} foi atualizado para R$ ${boleto.valor.toFixed(2)} com vencimento em ${boleto.vencimento} e código de barras: ${boleto.codigoDeBarras}.`);
-  } else {
-    bot.sendMessage(msg.chat.id, `Não encontrei o boleto ${nomeBoleto}. Tente novamente.`);
-  }
+  // Salva os boletos atualizados
+  salvarBoletos(boletos);
+  bot.sendMessage(msg.chat.id, `Novo boleto adicionado:\nNome: ${nomeBoleto}\nValor: R$ ${valor.toFixed(2)}\nVencimento: ${vencimento}\nCódigo de barras: ${codigoDeBarras}`);
 });
 
 // Comando /paguei <nome>
@@ -81,4 +78,3 @@ bot.onText(/\/paguei (.+)/, (msg, match) => {
     bot.sendMessage(msg.chat.id, `Não achei esse boleto. Tente /boletos para ver os nomes.`);
   }
 });
-
