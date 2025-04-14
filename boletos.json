@@ -1,23 +1,16 @@
 [
   {
-    "nome": "Luz",
-    "valor": 89.9,
-    "vencimento": "2025-04-15",
-    "pago": true,
-    "codigoDeBarras": 0
+    "nome": "Boleto 1",
+    "valor": 100.00,
+    "vencimento": "02/02/25", 
+    "pago": false,
+    "codigo_barras": "34191.79001 23456.789012 34567.890123 4 12340000010000"
   },
   {
-    "nome": "Internet",
-    "valor": 119.9,
-    "vencimento": "2025-04-20",
+    "nome": "Boleto 2",
+    "valor": 50.00,
+    "vencimento": "03/03/25",
     "pago": false,
-    "codigoDeBarras": 0
-  },
-  {
-    "nome": "Água",
-    "valor": 56.7,
-    "vencimento": "2025-04-25",
-    "pago": false,
-    "codigoDeBarras": 0
+    "codigo_barras": "34191.79001 23456.789012 34567.890123 4 23450000020000"
   }
 ]

@@ -38,6 +38,30 @@ bot.onText(/\/boletos/, (msg) => {
       bot.sendMessage(msg.chat.id, mensagem);
     }
   });
+
+  // Comando para atualizar o valor, vencimento e código de barras de um boleto
+bot.onText(/\/atualizar_boleto (.+) (\d+(\.\d{1,2})?) (\d{2}\/\d{2}\/\d{2}) (\d{44})/, (msg, match) => {
+  const nomeBoleto = match[1].trim().toLowerCase(); // Nome do boleto
+  const novoValor = parseFloat(match[2]); // Novo valor
+  const novoVencimento = match[3]; // Novo vencimento (dd/mm/aa)
+  const novoCodigoBarras = match[4]; // Novo código de barras (44 caracteres)
+
+  const boletos = lerBoletos(); // Lê os boletos do arquivo
+  const boleto = boletos.find(b => b.nome.toLowerCase() === nomeBoleto);
+
+  if (boleto) {
+    // Atualiza o valor, vencimento e código de barras do boleto
+    boleto.valor = novoValor;
+    boleto.vencimento = novoVencimento;
+    boleto.codigo_barras = novoCodigoBarras;
+    
+    // Salva os boletos atualizados
+    salvarBoletos(boletos);
+    bot.sendMessage(msg.chat.id, `O boleto de ${boleto.nome} foi atualizado para R$ ${boleto.valor.toFixed(2)} com vencimento em ${boleto.vencimento} e código de barras: ${boleto.codigo_barras}.`);
+  } else {
+    bot.sendMessage(msg.chat.id, `Não encontrei o boleto ${nomeBoleto}. Tente novamente.`);
+  }
+});
   
   // Comando /paguei <nome>
   bot.onText(/\/paguei (.+)/, (msg, match) => {
