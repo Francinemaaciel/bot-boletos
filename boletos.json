@@ -1,0 +1,23 @@
+[
+  {
+    "nome": "Luz",
+    "valor": 89.9,
+    "vencimento": "2025-04-15",
+    "pago": true,
+    "codigoDeBarras": 0
+  },
+  {
+    "nome": "Internet",
+    "valor": 119.9,
+    "vencimento": "2025-04-20",
+    "pago": false,
+    "codigoDeBarras": 0
+  },
+  {
+    "nome": "Água",
+    "valor": 56.7,
+    "vencimento": "2025-04-25",
+    "pago": false,
+    "codigoDeBarras": 0
+  }
+]

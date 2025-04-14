@@ -1,0 +1,60 @@
+require('dotenv').config();
+const TelegramBot = require('node-telegram-bot-api');
+
+const token = process.env.TELEGRAM_TOKEN;
+
+const fs = require('fs');
+
+const bot = new TelegramBot(token, {polling: true});
+
+function lerBoletos() {
+    const data = fs.readFileSync('boletos.json');
+    return JSON.parse(data);
+  }
+  
+  // Função para salvar boletos atualizados
+  function salvarBoletos(boletos) {
+    fs.writeFileSync('boletos.json', JSON.stringify(boletos, null, 2));
+  }
+  
+
+bot.onText(/\/start/, (msg) => {
+    bot.sendMessage(msg.chat.id, `Olá, ${msg.from.first_name}! Eu sou seu bot de boletos! Use /boletos para ver os pendentes.`);
+
+});
+
+// Comando /boletos
+bot.onText(/\/boletos/, (msg) => {
+    const boletos = lerBoletos();
+    const pendentes = boletos.filter(b => !b.pago);
+  
+    if (pendentes.length === 0) {
+      bot.sendMessage(msg.chat.id, "Uhul! Todos os boletos estão pagos!");
+    } else {
+      let mensagem = "Boletos pendentes:\n";
+      pendentes.forEach(b => {
+        mensagem += `- ${b.nome}: R$ ${b.valor.toFixed(2)} (vence em ${b.vencimento})\n Código de barras: ${b.codigoDeBarras}\n`;
+      });
+      bot.sendMessage(msg.chat.id, mensagem);
+    }
+  });
+  
+  // Comando /paguei <nome>
+  bot.onText(/\/paguei (.+)/, (msg, match) => {
+    const nomeDigitado = match[1].trim().toLowerCase();
+    const boletos = lerBoletos();
+    const boleto = boletos.find(b => b.nome.toLowerCase() === nomeDigitado);
+  
+    if (boleto) {
+      if (boleto.pago) {
+        bot.sendMessage(msg.chat.id, `O boleto de ${boleto.nome} já está marcado como pago.`);
+      } else {
+        boleto.pago = true;
+        salvarBoletos(boletos);
+        bot.sendMessage(msg.chat.id, `Beleza! Marquei o boleto de ${boleto.nome} como pago.`);
+      }
+    } else {
+      bot.sendMessage(msg.chat.id, `Não achei esse boleto. Tente /boletos para ver os nomes.`);
+    }
+  });
+
